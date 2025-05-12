@@ -1,205 +1,31 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import 'home_page.dart';
 
 void main() {
-  runApp(const TodoListApp());
+  runApp(const MyApp());
 }
 
-class TodoListApp extends StatelessWidget {
-  const TodoListApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Todo List',
+      title: 'Aplikasi Flutter',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
+        primarySwatch: Colors.blue,
+        scaffoldBackgroundColor: Colors.white,
+        fontFamily: 'Roboto',
         textTheme: const TextTheme(
-          titleLarge: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.teal,
-          ),
-          bodyMedium: TextStyle(fontSize: 18),
+          bodyLarge: TextStyle(fontSize: 18.0, color: Colors.black87),
+          titleLarge: TextStyle(fontSize: 22.0, fontWeight: FontWeight.bold),
         ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ButtonStyle(
-            backgroundColor: MaterialStatePropertyAll(Colors.teal),
-            foregroundColor: MaterialStatePropertyAll(Colors.white),
-          ),
+        appBarTheme: const AppBarTheme(
+          color: Colors.blue,
+          titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
       ),
-      home: const TodoHomePage(),
-    );
-  }
-}
-
-class TodoHomePage extends StatefulWidget {
-  const TodoHomePage({super.key});
-
-  @override
-  _TodoHomePageState createState() => _TodoHomePageState();
-}
-
-class _TodoHomePageState extends State<TodoHomePage> {
-  final List<String> _todos = [];
-  final List<String> _filteredTodos = [];
-  final TextEditingController _controller = TextEditingController();
-  final TextEditingController _searchController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _loadTodos();
-    _searchController.addListener(_filterTodos);
-  }
-
-  Future<void> _loadTodos() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? todosString = prefs.getString('todos');
-    if (todosString != null) {
-      final todosList = List<String>.from(jsonDecode(todosString));
-      setState(() {
-        _todos.addAll(todosList);
-        _filteredTodos.addAll(todosList);
-      });
-    }
-  }
-
-  Future<void> _saveTodos() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('todos', jsonEncode(_todos));
-  }
-
-  void _addTodo() {
-    final text = _controller.text.trim();
-    if (text.isNotEmpty) {
-      setState(() {
-        _todos.add(text);
-        _controller.clear();
-      });
-      _saveTodos();
-      _filterTodos();
-    }
-  }
-
-  void _removeTodo(int index) {
-    final todoToRemove = _filteredTodos[index];
-    setState(() {
-      _todos.remove(todoToRemove);
-    });
-    _saveTodos();
-    _filterTodos();
-  }
-
-  void _filterTodos() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      if (query.isEmpty) {
-        _filteredTodos
-          ..clear()
-          ..addAll(_todos);
-      } else {
-        _filteredTodos
-          ..clear()
-          ..addAll(
-            _todos.where((todo) => todo.toLowerCase().contains(query)),
-          );
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Daftar Tugas'),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Search Bar
-            TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Cari Tugas',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _filterTodos();
-                        },
-                      )
-                    : null,
-                border: const OutlineInputBorder(),
-              ),
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            // Form Tambah Tugas
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _controller,
-                    decoration: const InputDecoration(
-                      labelText: 'Tambahkan Tugas',
-                      border: OutlineInputBorder(),
-                    ),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                  ),
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton(
-                  onPressed: _addTodo,
-                  child: const Text('Tambah'),
-                )
-              ],
-            ),
-            const SizedBox(height: 16),
-            // Daftar Tugas
-            Expanded(
-              child: _filteredTodos.isEmpty
-                  ? const Center(
-                      child: Text(
-                        'Tidak ada tugas ditemukan',
-                        style: TextStyle(color: Colors.grey),
-                      ),
-                    )
-                  : ListView.builder(
-                      itemCount: _filteredTodos.length,
-                      itemBuilder: (context, index) {
-                        return Card(
-                          child: ListTile(
-                            title: Text(
-                              _filteredTodos[index],
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete),
-                              onPressed: () => _removeTodo(index),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-            )
-          ],
-        ),
-      ),
+      home: const TodoHomePage(), // Ini memanggil TodoList kamu
     );
   }
 }
